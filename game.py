@@ -1,35 +1,9 @@
 
 
-
-class ManualPlayer:
-    def __init__(self):
-        pass
-    
-    def select_cell(self, m, n):
-        while True:
-            print("Choose a square to Play")
-            try:
-                cell_coordinate = input().split(' ')
-                x, y = int(cell_coordinate[0]), int(cell_coordinate[1])
-                if x > m or y > n or x < 1 or y < 1:
-                    print("Input Out of Range")
-                    continue
-                else:
-                    return (x, y)
-            except KeyboardInterrupt:
-                exit()
-            except:
-                print("Invalid Input Format, Input Format is 'x y'")
-                
-
-class AutomaticPlayer:
-    def __init__(self):
-        pass
-        
-
 class Game:
     def __init__(self, m: int, n: int, k: int):
         self.initialize_game(m, n, k)
+        
         
         
     def initialize_game(self, m: int, n: int, k: int, starting_player: int = 1):
@@ -40,41 +14,111 @@ class Game:
         self.cells1 = set()
         self.cells2 = set()
         
-        self.player1 = ManualPlayer()
-        self.player2 = AutomaticPlayer()
-        
+        self.empty_cells = set()
+        for x in range(m):
+            for y in range(n):
+                self.empty_cells.add((x, y))
+
         self.current_player = starting_player    # 0 for Max (the actual player), 1 for Min (the automatic player)
-            
     
         
-    def play(self):
-        while self.has_ended() == False:
+    def play(self, auto = False):
+        while True:
             self.turn()
-        
+            state = self.is_terminal()
+            
     
     def turn(self):
         if self.current_player == 1:
             print("Player 1 Turn")
             while True:
-                x, y = self.player1.select_cell(self.m, self.n)
+                x, y = self.select_cell()
                 if (x, y) not in self.cells1 and (x, y) not in self.cells2:
                     self.cells1.add((x, y))
-                    # self.current_player = 2
+                    self.current_player = 2
                     break
                 else:
                     print("Cell already taken")
                     continue
+            
         
         elif self.current_player == 2:
             pass
         
-        self.print_board()
+        self.drawboard()
         
-    def has_ended(self):
+        
+    def max_value(self):
+        board_state = self.is_terminal()
+        
+        value = float("-inf")
+        
+        if board_state == 1:
+            return 1
+        elif board_state == 2:
+            return -1
+        elif board_state == 0:
+            for move in self.possible_moves(self.cells1, self.cells2):
+                self.cells1.add(move)
+                value = max(value, self.min_value(self.cells1, self.cells2))
+                self.cells1.remove(move)
+            
+        return value
+    
+    
+    def min_value(self):
+        board_state = self.is_terminal()
+        
+        value = float("inf")
+        
+        if board_state == 1:
+            return 1
+        elif board_state == 2:
+            return -1
+        elif board_state == 0:
+            for move in self.possible_moves(self.cells1, self.cells2):
+                self.cells2.add(move)
+                value = min(value, self.max_value(self.cells1, self.cells2))
+                self.cells2.remove(move)
+        
+        return value
+    
+        
+    def is_terminal(self, last_placed_cell):
+        directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
+
         return False
     
+    
+    def player1_move(self, coordinate):
+        x, y = coordinate
+        self.cells1.add((x, y))
+        self.empty_cells.remove((x, y))
+        
+    def player2_move(self, coordinate):
+        x, y = coordinate
+        self.cells2.add((x, y))
+        self.empty_cells.remove((x, y))
+        
+        
+    def select_cell(self):
+        while True:
+            print("Choose a square to Play")
+            try:
+                cell_coordinate = input().split(' ')
+                x, y = int(cell_coordinate[0]), int(cell_coordinate[1])
+                if x > self.m or y > self.n or x < 1 or y < 1:
+                    print("Input Out of Range")
+                    continue
+                else:
+                    return (x, y)
+            except KeyboardInterrupt:
+                exit()
+            except:
+                print("Invalid Input Format, Input Format is 'x y'")
+    
 
-    def print_board(self):
+    def drawboard(self):
         board_str = ""
         for y in range(1, self.n+1):
             for x in range(1, self.m+1):
@@ -90,6 +134,8 @@ class Game:
         print("")
         print("Current Board:")
         print(board_str)
+    
+    
     
 if __name__ == "__main__":
     game = Game(3, 3, 3)
