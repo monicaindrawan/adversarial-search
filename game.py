@@ -26,8 +26,7 @@ class Game:
     def play(self, auto = False):
         while True:
             self.turn()
-            print(self.is_terminal())
-            
+
             if self.is_terminal():
                 return False
     
@@ -41,17 +40,22 @@ class Game:
                 print(x,y)
                 if (x, y) not in self.cells1 and (x, y) not in self.cells2:
                     self.cells1.add((x, y))
-                    # self.current_player = 2
+                    self.current_player = 2
                     break
                 else:
                     print("Cell already taken")
                     continue
             
         elif self.current_player == 2:
-            pass
+            print("Player 2 Turn")
+            value, move = self.min_value()
+            self.cells2.add(move)
+            self.current_player = 1
         
         self.last_placed_cell = (x, y)
         self.drawboard()
+        # print(self.cells1)
+        # print(self.cells2)
 
         
         
@@ -59,16 +63,16 @@ class Game:
         board_state = self.check_state()
         
         best_value = float("-inf")
-        best_move = (-1, -1)
+        best_move = None
         
         if board_state == 1:
             return (1, None)
         elif board_state == 2:
             return (-1, None)
         elif board_state == 0:
-            for move in self.possible_moves(self.cells1, self.cells2):
+            for move in self.possible_moves():
                 self.cells1.add(move)
-                new_value = self.min_value(self.cells1, self.cells2)[0]
+                new_value = self.min_value()[0]
                 if best_value < new_value:
                     best_value = new_value
                     best_move = move
@@ -81,16 +85,16 @@ class Game:
         board_state = self.check_state()
         
         best_value = float("inf")
-        best_move = (-1, -1)
+        best_move = None
         
         if board_state == 1:
             return (1, None)
         elif board_state == 2:
             return (-1, None)
         elif board_state == 0:
-            for move in self.possible_moves(self.cells1, self.cells2):
+            for move in self.possible_moves():
                 self.cells2.add(move)
-                new_value = self.max_value(self.cells1, self.cells2)[0]
+                new_value = self.max_value()[0]
                 if best_value > new_value:
                     best_value = new_value
                     best_move = move
@@ -182,6 +186,17 @@ class Game:
                 exit()
             except:
                 print("Invalid Input Format, Input Format is 'x y'")
+    
+    
+    def possible_moves(self):
+        possible_cells = set()
+        
+        for x in range(1, self.m+1):
+            for y in range(1, self.n+1):
+                if (x, y) not in self.cells1 and (x, y) not in self.cells2:
+                    possible_cells.add((x, y))
+        
+        return possible_cells
     
 
     def drawboard(self):
