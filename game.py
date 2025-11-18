@@ -14,13 +14,15 @@ class Game:
         self.cells1 = set()
         self.cells2 = set()
         
+        self.last_placed_cell1 = None
+        self.last_placed_cell2 = None
+        
         self.empty_cells = set()
         for x in range(m):
             for y in range(n):
                 self.empty_cells.add((x, y))
 
         self.current_player = starting_player    # 0 for Max (the actual player), 1 for Min (the automatic player)
-        self.last_placed_cell = None
     
         
     def play(self, auto = False):
@@ -28,8 +30,9 @@ class Game:
             self.turn()
 
             if self.is_terminal():
-                return False
-    
+                return
+            self.swap_turn()
+        
     
     def turn(self, draw = True):
         x, y = (-1, -1)
@@ -40,7 +43,7 @@ class Game:
                 print(x,y)
                 if (x, y) not in self.cells1 and (x, y) not in self.cells2:
                     self.cells1.add((x, y))
-                    self.current_player = 2
+                    self.last_placed_cell1 = (x, y)
                     break
                 else:
                     print("Cell already taken")
@@ -50,14 +53,17 @@ class Game:
             print("Player 2 Turn")
             value, move = self.min_value()
             self.cells2.add(move)
-            self.current_player = 1
-        
-        self.last_placed_cell = (x, y)
-        self.drawboard()
-        # print(self.cells1)
-        # print(self.cells2)
+            self.last_placed_cell2 = move
+            
+        # self.drawboard()
+        print(self.cells1)
+        print(self.cells2)
 
-        
+    def swap_turn(self):
+        if self.current_player == 1:
+            self.current_player = 2
+        else:
+            self.current_player =1
         
     def max_value(self):
         board_state = self.check_state()
@@ -73,6 +79,7 @@ class Game:
             for move in self.possible_moves():
                 self.cells1.add(move)
                 new_value = self.min_value()[0]
+                
                 if best_value < new_value:
                     best_value = new_value
                     best_move = move
@@ -95,6 +102,7 @@ class Game:
             for move in self.possible_moves():
                 self.cells2.add(move)
                 new_value = self.max_value()[0]
+                
                 if best_value > new_value:
                     best_value = new_value
                     best_move = move
@@ -106,32 +114,35 @@ class Game:
         
     def is_terminal(self):
         if self.current_player == 1:
-            attacked_cells = self.cells1
+            return self.check_terminal(self.cells1, self.last_placed_cell1)
         else:
-            attacked_cells = self.cells2
+            return self.check_terminal(self.cells2, self.last_placed_cell2)
         
-        return self.check_terminal(attacked_cells)
     
     
     def check_state(self):
-        player1_won = self.check_terminal(self.cells1)
+        player1_won = self.check_terminal(self.cells1, self.last_placed_cell1)
         if player1_won:
             return 1
-        player2_won = self.check_terminal(self.cells2)
+        
+        player2_won = self.check_terminal(self.cells2, self.last_placed_cell2)
         if player2_won:
-            return -1
+            return 2
         
         return 0
     
     
-    def check_terminal(self, cells):
+    def check_terminal(self, cells, last_placed_cell=None):
+        if last_placed_cell == None:
+            return False
+        
         directions = [(1,0), (0,1), (1,1), (1,-1)]
 
         for direction in directions:
             count = 1
 
             for dir in ['+', '-']:
-                current_cell = self.last_placed_cell
+                current_cell = last_placed_cell
                 while True:
                     if dir == '+':
                         current_cell = (current_cell[0] + direction[0], current_cell[1] + direction[1])
