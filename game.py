@@ -20,19 +20,21 @@ class Game:
                 self.empty_cells.add((x, y))
 
         self.current_player = starting_player    # 0 for Max (the actual player), 1 for Min (the automatic player)
+        self.last_placed_cell = None
     
         
     def play(self, auto = False):
         while True:
             self.turn()
-            state = self.is_terminal()
-            
+            if self.is_terminal():
+                return False
     
     def turn(self):
         if self.current_player == 1:
             print("Player 1 Turn")
             while True:
                 x, y = self.select_cell()
+                print(x,y)
                 if (x, y) not in self.cells1 and (x, y) not in self.cells2:
                     self.cells1.add((x, y))
                     self.current_player = 2
@@ -45,6 +47,7 @@ class Game:
         elif self.current_player == 2:
             pass
         
+        self.last_placed_cell = (x,y)
         self.drawboard()
         
         
@@ -84,11 +87,46 @@ class Game:
         return value
     
         
-    def is_terminal(self, last_placed_cell):
-        directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
+    def is_terminal(self):
+        if self.current_player == 1:
+            attacked_cells = self.cells1
+        else:
+            attacked_cells = self.cells2
+        
+        directions = [(1,0), (0,1), (1,1), (1,-1)]
 
-        return False
+        for direction in directions:
+            count = 1
+
+            for dir in ['+' '-']:
+                current_cell = self.last_placed_cell
+                while True:
+                    if dir == '+':
+                        current_cell = (current_cell[0] + direction[0], current_cell[1] + direction[1])
+                    else:
+                        current_cell = (current_cell[0] - direction[0], current_cell[1] - direction[1])
+
+                    if self.is_valid(current_cell):
+                        if current_cell in attacked_cells:
+                            count += 1
+                        else:
+                            break
+                    else:
+                        break
+        
+            if self.k == count:
+                return True
+            return False
+
     
+    def is_valid(self, coordinate):
+        x = coordinate[0]
+        y = coordinate[1]
+
+        if x > self.m or y > self.n or x < 1 or y < 1:
+            return False
+         
+        return True
     
     def player1_move(self, coordinate):
         x, y = coordinate
