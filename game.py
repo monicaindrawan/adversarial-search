@@ -38,6 +38,8 @@ class Game:
         x, y = (-1, -1)
         if self.current_player == 1:
             print("Player 1 Turn")
+            value, move = self.max_value()
+            print(f"Recommended Move {move[0]} {move[1]}")
             while True:
                 x, y = self.select_cell()
                 print(x,y)
@@ -55,9 +57,10 @@ class Game:
             self.cells2.add(move)
             self.last_placed_cell2 = move
             
-        # self.drawboard()
-        print(self.cells1)
-        print(self.cells2)
+        if draw:
+            self.drawboard()
+        # print(self.cells1)
+        # print(self.cells2)
 
     def swap_turn(self):
         if self.current_player == 1:
@@ -70,6 +73,7 @@ class Game:
         
         best_value = float("-inf")
         best_move = None
+        original_cell = self.last_placed_cell1
         
         if board_state == 1:
             return (1, None)
@@ -78,13 +82,15 @@ class Game:
         elif board_state == 0:
             for move in self.possible_moves():
                 self.cells1.add(move)
+                self.last_placed_cell1 = move
                 new_value = self.min_value()[0]
                 
                 if best_value < new_value:
                     best_value = new_value
                     best_move = move
                 self.cells1.remove(move)
-            
+                
+        self.last_placed_cell1 = original_cell
         return best_value, best_move
     
     
@@ -93,6 +99,7 @@ class Game:
         
         best_value = float("inf")
         best_move = None
+        original_cell = self.last_placed_cell2
         
         if board_state == 1:
             return (1, None)
@@ -101,13 +108,15 @@ class Game:
         elif board_state == 0:
             for move in self.possible_moves():
                 self.cells2.add(move)
+                self.last_placed_cell2 = move
                 new_value = self.max_value()[0]
                 
                 if best_value > new_value:
                     best_value = new_value
                     best_move = move
                 self.cells2.remove(move)
-        
+            
+        self.last_placed_cell2 = original_cell
         return best_value, best_move
     
     
