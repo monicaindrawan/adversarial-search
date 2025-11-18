@@ -75,6 +75,9 @@ class Game:
         best_move = None
         original_cell = self.last_placed_cell1
         
+        if len(self.possible_moves()) == 0:
+            return (0, None)
+        
         if board_state == 1:
             return (1, None)
         elif board_state == 2:
@@ -100,6 +103,9 @@ class Game:
         best_value = float("inf")
         best_move = None
         original_cell = self.last_placed_cell2
+        
+        if len(self.possible_moves()) == 0:
+            return (0, None)
         
         if board_state == 1:
             return (1, None)
