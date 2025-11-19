@@ -111,6 +111,7 @@ class Game:
                 self.empty_cells.add(move)
 
                 if best_value >= beta:
+                    self.last_placed_cell1 = original_cell
                     return best_value, best_move
 
                 alpha = max(alpha, best_value)
@@ -147,6 +148,7 @@ class Game:
                 self.empty_cells.add(move)
 
                 if best_value <= alpha:
+                    self.last_placed_cell2 = original_cell
                     return best_value, best_move
                 
                 beta = min(beta, best_value)
@@ -179,7 +181,6 @@ class Game:
     def check_terminal(self, cells, last_placed_cell=None):
         if last_placed_cell == None:
             return False
-        
         directions = [(1,0), (0,1), (1,1), (1,-1)]
 
         for direction in directions:
@@ -274,6 +275,6 @@ class Game:
     
     
 if __name__ == "__main__":
-    game = Game(4, 4, 3)
+    game = Game(3, 3, 3)
     print(game)
     game.play()
