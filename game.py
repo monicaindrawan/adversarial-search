@@ -25,12 +25,14 @@ class Game:
                 self.empty_cells.add((x, y))
 
         self.current_player = starting_player    # 0 for Max (the actual player), 1 for Min (the automatic player)
+
+        self.visited_states_count = 0
     
         
     def play(self, auto = False):
         while True:
             self.turn()
-            
+
             board_state = self.check_state()
             if board_state == 1:
                 print("Player 1 Won!")
@@ -49,11 +51,15 @@ class Game:
         x, y = (-1, -1)
         if self.current_player == 1:
             print("Player 1 Turn")
+
             start_time = time.time()
             value, move = self.max_value(float('-inf'), float('inf'))
             end_time = time.time()
-            print(end_time-start_time)
+    
+            print(f"time needed: {end_time-start_time}")
+            print(f"Visited States Count: {self.visited_states_count}")
             print(f"Recommended Move {move[0]} {move[1]}")
+    
             while True:
                 x, y = self.select_cell()
                 if (x, y) not in self.cells1 and (x, y) not in self.cells2:
@@ -68,14 +74,15 @@ class Game:
         elif self.current_player == 2:
             print("Player 2 Turn")
             value, move = self.min_value(float('-inf'), float('inf'))
+            end_time = time.time()
+            print(f"time needed: {end_time-start_time}")
             self.cells2.add(move)
             self.empty_cells.remove(move)
             self.last_placed_cell2 = move
             
         if draw:
             self.drawboard()
-        # print(self.cells1)
-        # print(self.cells2)
+
 
     def swap_turn(self):
         if self.current_player == 1:
@@ -84,6 +91,7 @@ class Game:
             self.current_player = 1
         
     def max_value(self, alpha, beta):
+        self.visited_states_count += 1
         board_state = self.check_state()
         
         best_value = float("-inf")
@@ -110,10 +118,12 @@ class Game:
                 self.cells1.remove(move)
                 self.empty_cells.add(move)
 
+                # Prune if current best value is greater than beta
                 if best_value >= beta:
                     self.last_placed_cell1 = original_cell
                     return best_value, best_move
 
+                # Update alpha based on current best value
                 alpha = max(alpha, best_value)
                 
         self.last_placed_cell1 = original_cell
@@ -121,6 +131,7 @@ class Game:
     
     
     def min_value(self, alpha, beta):
+        self.visited_states_count += 1
         board_state = self.check_state()
         
         best_value = float("inf")
@@ -147,24 +158,17 @@ class Game:
                 self.cells2.remove(move)
                 self.empty_cells.add(move)
 
+                # Prune if current best value is smaller than alpha
                 if best_value <= alpha:
                     self.last_placed_cell2 = original_cell
                     return best_value, best_move
                 
+                # Update beta based on current best value
                 beta = min(beta, best_value)
             
         self.last_placed_cell2 = original_cell
         return best_value, best_move
-    
-    
-        
-    # def is_terminal(self):
-    #     if self.current_player == 1:
-    #         return self.check_terminal(self.cells1, self.last_placed_cell1)
-    #     else:
-    #         return self.check_terminal(self.cells2, self.last_placed_cell2)
-        
-    
+
     
     def check_state(self):
         player1_won = self.check_terminal(self.cells1, self.last_placed_cell1)
@@ -243,17 +247,6 @@ class Game:
             except:
                 print("Invalid Input Format, Input Format is 'x y'")
     
-    
-    # def possible_moves(self):
-    #     possible_cells = set()
-        
-    #     for x in range(1, self.m+1):
-    #         for y in range(1, self.n+1):
-    #             if (x, y) not in self.cells1 and (x, y) not in self.cells2:
-    #                 possible_cells.add((x, y))
-        
-    #     return possible_cells
-    
 
     def drawboard(self):
         board_str = ""
@@ -275,6 +268,6 @@ class Game:
     
     
 if __name__ == "__main__":
-    game = Game(3, 3, 3)
+    game = Game(4, 3, 3)
     print(game)
     game.play()
