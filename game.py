@@ -1,9 +1,11 @@
-
+import time
 
 class Game:
     def __init__(self, m: int, n: int, k: int):
         self.initialize_game(m, n, k)
-        
+
+    def __str__(self):
+        return f"Game of m: {self.m}, n: {self.n}, k: {self.k}"
         
         
     def initialize_game(self, m: int, n: int, k: int, starting_player: int = 1):
@@ -47,11 +49,13 @@ class Game:
         x, y = (-1, -1)
         if self.current_player == 1:
             print("Player 1 Turn")
-            value, move = self.max_value()
+            start_time = time.time()
+            value, move = self.max_value(float('-inf'), float('inf'))
+            end_time = time.time()
+            print(end_time-start_time)
             print(f"Recommended Move {move[0]} {move[1]}")
             while True:
                 x, y = self.select_cell()
-                print(x,y)
                 if (x, y) not in self.cells1 and (x, y) not in self.cells2:
                     self.cells1.add((x, y))
                     self.empty_cells.remove((x, y))
@@ -63,7 +67,7 @@ class Game:
             
         elif self.current_player == 2:
             print("Player 2 Turn")
-            value, move = self.min_value()
+            value, move = self.min_value(float('-inf'), float('inf'))
             self.cells2.add(move)
             self.empty_cells.remove(move)
             self.last_placed_cell2 = move
@@ -79,74 +83,84 @@ class Game:
         else:
             self.current_player = 1
         
-    def max_value(self):
+    def max_value(self, alpha, beta):
         board_state = self.check_state()
         
         best_value = float("-inf")
         best_move = None
         original_cell = self.last_placed_cell1
         
-        if len(self.empty_cells) == 0:
-            return (0, None)
-        
         if board_state == 1:
             return (1, None)
         elif board_state == 2:
             return (-1, None)
+        if len(self.empty_cells) == 0:
+            return (0, None)
+
         elif board_state == 0:
             for move in list(self.empty_cells):
                 self.cells1.add(move)
                 self.empty_cells.remove(move)
                 self.last_placed_cell1 = move
-                new_value = self.min_value()[0]
+                new_value = self.min_value(alpha, beta)[0]
                 
                 if best_value < new_value:
                     best_value = new_value
                     best_move = move
                 self.cells1.remove(move)
                 self.empty_cells.add(move)
+
+                if best_value >= beta:
+                    return best_value, best_move
+
+                alpha = max(alpha, best_value)
                 
         self.last_placed_cell1 = original_cell
         return best_value, best_move
     
     
-    def min_value(self):
+    def min_value(self, alpha, beta):
         board_state = self.check_state()
         
         best_value = float("inf")
         best_move = None
         original_cell = self.last_placed_cell2
         
-        if len(self.empty_cells) == 0:
-            return (0, None)
-        
         if board_state == 1:
             return (1, None)
         elif board_state == 2:
             return (-1, None)
+        if len(self.empty_cells) == 0:
+            return (0, None)
+
         elif board_state == 0:
             for move in list(self.empty_cells):
                 self.cells2.add(move)
                 self.empty_cells.remove(move)
                 self.last_placed_cell2 = move
-                new_value = self.max_value()[0]
+                new_value = self.max_value(alpha, beta)[0]
                 
                 if best_value > new_value:
                     best_value = new_value
                     best_move = move
                 self.cells2.remove(move)
                 self.empty_cells.add(move)
+
+                if best_value <= alpha:
+                    return best_value, best_move
+                
+                beta = min(beta, best_value)
             
         self.last_placed_cell2 = original_cell
         return best_value, best_move
     
     
         
-    def is_terminal(self):
-        if self.current_player == 1:
-            return self.check_terminal(self.cells1, self.last_placed_cell1)
-        else:
-            return self.check_terminal(self.cells2, self.last_placed_cell2)
+    # def is_terminal(self):
+    #     if self.current_player == 1:
+    #         return self.check_terminal(self.cells1, self.last_placed_cell1)
+    #     else:
+    #         return self.check_terminal(self.cells2, self.last_placed_cell2)
         
     
     
@@ -260,5 +274,6 @@ class Game:
     
     
 if __name__ == "__main__":
-    game = Game(3, 3, 3)
+    game = Game(4, 4, 3)
+    print(game)
     game.play()
