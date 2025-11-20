@@ -101,7 +101,7 @@ class Game:
             return (0, None)
 
         elif board_state == 0:
-            for move in list(self.empty_cells):
+            for move in self.empty_cells.copy():
                 self.cells1.add(move)
                 self.empty_cells.remove(move)
                 self.last_placed_cell1 = move
@@ -133,7 +133,7 @@ class Game:
             return (0, None)
 
         elif board_state == 0:
-            for move in list(self.empty_cells):
+            for move in self.empty_cells.copy():
                 self.cells2.add(move)
                 self.empty_cells.remove(move)
                 self.last_placed_cell2 = move
@@ -273,6 +273,6 @@ class Game:
     
     
 if __name__ == "__main__":
-    game = Game(4, 3, 3)
+    game = Game(3, 3, 3)
     print(game)
     game.play()

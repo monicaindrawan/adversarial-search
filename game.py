@@ -73,6 +73,7 @@ class Game:
             
         elif self.current_player == 2:
             print("Player 2 Turn")
+            start_time = time.time()
             value, move = self.min_value(float('-inf'), float('inf'))
             end_time = time.time()
             print(f"time needed: {end_time-start_time}")
@@ -106,7 +107,7 @@ class Game:
             return (0, None)
 
         elif board_state == 0:
-            for move in list(self.empty_cells):
+            for move in self.get_ordered_moves():
                 self.cells1.add(move)
                 self.empty_cells.remove(move)
                 self.last_placed_cell1 = move
@@ -146,7 +147,7 @@ class Game:
             return (0, None)
 
         elif board_state == 0:
-            for move in list(self.empty_cells):
+            for move in self.get_ordered_moves():
                 self.cells2.add(move)
                 self.empty_cells.remove(move)
                 self.last_placed_cell2 = move
@@ -169,6 +170,10 @@ class Game:
         self.last_placed_cell2 = original_cell
         return best_value, best_move
 
+    # Alpha-beta pruning works best when the best moves are explored first so more subtrees can be pruned
+    def get_ordered_moves(self):
+        center = (self.m / 2, self.n / 2)
+        return sorted(list(self.empty_cells), key=lambda p: (p[0]-center[0])**2 + (p[1]-center[1])**2)
     
     def check_state(self):
         player1_won = self.check_terminal(self.cells1, self.last_placed_cell1)
@@ -296,6 +301,6 @@ class Game:
     
     
 if __name__ == "__main__":
-    game = Game(4, 3, 3)
+    game = Game(4, 4, 3)
     print(game)
     game.play()
