@@ -183,35 +183,63 @@ class Game:
     
     
     def check_terminal(self, cells, last_placed_cell=None):
+        """
+        Check if the game has ended
+
+        Args:
+            cells (set of tuple) : current taken cells by player
+            last_placed_cell (tuple) : current picked cell by player
+
+        Returns:
+            bool : True if game has ended
+        """
+
         if last_placed_cell == None:
             return False
+
+        # Initiliaze checking directions
         directions = [(1,0), (0,1), (1,1), (1,-1)]
 
         for direction in directions:
             count = 1
 
+            # Looping two sides of each direction
             for dir in ['+', '-']:
                 current_cell = last_placed_cell
                 while True:
+                    # Generate neighbour cell
                     if dir == '+':
                         current_cell = (current_cell[0] + direction[0], current_cell[1] + direction[1])
                     else:
                         current_cell = (current_cell[0] - direction[0], current_cell[1] - direction[1])
 
                     if self.is_valid(current_cell):
+                        
                         if current_cell in cells:
+                            # Track cells if neighbour cell is taken by player
                             count += 1
                         else:
                             break
                     else:
                         break
-        
+                
+            # Return True if the consequtive picked cells have reached length of k
             if count >= self.k:
                 return True
         return False
 
     
     def is_valid(self, coordinate):
+        """
+        Check if a cell is within board
+
+        Args:
+            coordinate (tuple) : current observed neighbouring cell
+    
+        Returns:
+            bool : True if neighbouring cell is within board
+        """
+        
         x = coordinate[0]
         y = coordinate[1]
 
