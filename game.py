@@ -1,6 +1,13 @@
 import time
 
 class Game:
+    """
+    A class implementing a generalised mnk game, on a m-by-n board game where k consecutive 
+    marks are required to win.
+    
+    The game includes an AI implementation using the Minimax algorithm with 
+    Alpha-Beta pruning.
+    """
     def __init__(self, m: int, n: int, k: int):
         self.initialize_game(m, n, k)
 
@@ -9,6 +16,7 @@ class Game:
         
         
     def initialize_game(self, m: int, n: int, k: int, starting_player: int = 1):
+        
         self.m = m
         self.n = n
         self.k = k
@@ -56,8 +64,8 @@ class Game:
             value, move = self.max_value(float('-inf'), float('inf'))
             end_time = time.time()
     
-            print(f"time needed: {end_time-start_time}")
-            print(f"Visited States Count: {self.visited_states_count}")
+            # print(f"time needed: {end_time-start_time}")
+            # print(f"Visited States Count: {self.visited_states_count}")
             print(f"Recommended Move {move[0]} {move[1]}")
     
             while True:
@@ -76,7 +84,7 @@ class Game:
             start_time = time.time()
             value, move = self.min_value(float('-inf'), float('inf'))
             end_time = time.time()
-            print(f"time needed: {end_time-start_time}")
+            # print(f"time needed: {end_time-start_time}")
             self.cells2.add(move)
             self.empty_cells.remove(move)
             self.last_placed_cell2 = move
@@ -283,7 +291,14 @@ class Game:
 
     def drawboard(self):
         board_str = ""
+        
+        board_str += "   "
+        for x in range(1, self.m+1):
+            board_str += f"{x} "
+        board_str += "\n\n"
+        
         for y in range(1, self.n+1):
+            board_str += f"{y}  "
             for x in range(1, self.m+1):
                 if (x, y) in self.cells1:
                     board_str += '1'
@@ -300,7 +315,25 @@ class Game:
     
     
     
+def get_input_config():
+    while True:
+        print("Enter game config (m n k), e.g. '3 3 3'")
+        try:
+            input_list = input().split()
+            m, n, k = int(input_list[0]), int(input_list[1]), int(input_list[2])
+            if k > m and k > n:
+                print("Please enter valid k values")
+            else:
+                print('')
+                return (m, n, k)
+        except KeyboardInterrupt:
+            exit()
+        except:
+            print("Please enter valid (m n k) values")
+        
+    
 if __name__ == "__main__":
-    game = Game(4, 4, 3)
-    print(game)
+    m, n, k = get_input_config()
+    
+    game = Game(m, n, k)
     game.play()
