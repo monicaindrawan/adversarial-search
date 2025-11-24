@@ -95,13 +95,12 @@ class Game:
         if self.current_player == 1:
             print("Player 1 Turn")
             
+            self.visited_states_count = -1
             start_time = time.time()
             # Calculate the best move using minimax with alpha beta pruning
             value, move = self.max_value(float('-inf'), float('inf'))
             end_time = time.time()
     
-            # print(f"time needed: {end_time-start_time}")
-            # print(f"Visited States Count: {self.visited_states_count}")
             print(f"Recommended Move {move[0]} {move[1]}")
             
             # Input loop: ensure user picks a valid, empty cell
@@ -118,11 +117,12 @@ class Game:
         # Player 2 (AI) turn
         elif self.current_player == 2:
             print("Player 2 Turn")
+
+            self.visited_states_count = -1
             start_time = time.time()
             # AI calculates the best move for itself (Minimising strategy)
             value, move = self.min_value(float('-inf'), float('inf'))
             end_time = time.time()
-            # print(f"time needed: {end_time-start_time}")
             
             # AI plays the move directly calculated above
             self.cells2.add(move)
